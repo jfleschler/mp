@@ -6,7 +6,7 @@
 
 		var canvas = document.getElementById( 'canvas' );
 		canvas.addEventListener('click', function ( e ) {
-//			ctx.onclick.call( ctx, e );
+			ctx.onclick.call( ctx, e );
 		});
 
 		window.addEventListener( 'keydown', function ( e ) {
@@ -53,6 +53,10 @@
 		var cx = event.clientX - event.target.getBoundingClientRect().left;
 		var cy = event.clientY - event.target.getBoundingClientRect().top;
 
+		if ( !this.game.state.objects ) {
+			return;
+		}
+
 		var player = this.game.state.objects[playerId];
 
 		if ( !player ) {
@@ -80,7 +84,7 @@
 		var py = player.y;
 
 		var angle = Math.atan2( cy - py, cx - px );
-		socket.emit( 'move', { direction : angle } );
+		socket.emit( 'shoot', { direction : angle } );
 	};
 
 	exports.Input = DesktopInput;

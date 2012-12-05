@@ -6,7 +6,7 @@
 
 		var canvas = document.getElementById( 'canvas' );
 		canvas.addEventListener('click', function ( e ) {
-//			ctx.onclick.call( ctx, e );
+			ctx.onclick.call( ctx, e );
 		});
 
 		window.addEventListener( 'keydown', function ( e ) {
@@ -40,19 +40,22 @@
 
 	DesktopInput.prototype.onmove = function ( event ) {
 		var player = this.game.state.objects[playerId];
-console.log('here');
 		if ( !player ) {
+
 			return;
 		}
 		if ( event.keyCode == 87 ) {
-			socket.emit( 'move' );
-			console.log('move', {});
+			socket.emit( 'move', {} );
 		}
 	};
 
 	DesktopInput.prototype.onrotate = function ( event ) {
 		var cx = event.clientX - event.target.getBoundingClientRect().left;
 		var cy = event.clientY - event.target.getBoundingClientRect().top;
+
+		if ( !this.game ) {
+			return;
+		}
 
 		var player = this.game.state.objects[playerId];
 
@@ -81,7 +84,7 @@ console.log('here');
 		var py = player.y;
 
 		var angle = Math.atan2( cy - py, cx - px );
-		socket.emit( 'move', { direction : angle } );
+		socket.emit( 'shoot', { direction : angle } );
 	};
 
 	exports.Input = DesktopInput;

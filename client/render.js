@@ -27,7 +27,9 @@
 				console.log( 'player', o.id, 'died' );
 			}
 
-			this.renderObject_( o );
+			if ( !o.dead ) {
+				this.renderObject_( o );
+			}
 		}
 	
 		var ctx = this;
@@ -41,25 +43,32 @@
 
 		ctx.fillStyle = 'black';
 		ctx.strokeStyle = 'black';
+		if ( obj.type === 'player' ) {
+			ctx.save();
+			ctx.translate( obj.x, obj.y );
+			ctx.rotate( obj.dir );
+			ctx.beginPath();
+	//		ctx.fillRect( obj.x, obj.y, obj.r, obj.r );
+			ctx.moveTo( -10, -6 );
+			ctx.lineTo(  12,  0 );
+			ctx.lineTo( -10,  6 );
+			ctx.lineTo(  -6,  0 );
+			ctx.closePath();
+	//		ctx.fill();
+			ctx.stroke();
+			ctx.restore();
 
-		ctx.save();
-		ctx.translate( obj.x, obj.y );
-		ctx.rotate( obj.dir );
-		ctx.beginPath();
-//		ctx.fillRect( obj.x, obj.y, obj.r, obj.r );
-		ctx.moveTo( -10, -6 );
-		ctx.lineTo(  12,  0 );
-		ctx.lineTo( -10,  6 );
-		ctx.lineTo(  -6,  0 );
-		ctx.closePath();
-//		ctx.fill();
-		ctx.stroke();
-		ctx.restore();
-
-		ctx.font = "8pt monospace";
-		ctx.fillStyle = 'black';
-		ctx.textAlign = 'center';
-		ctx.fillText( obj.id, obj.x, obj.y - 8 );
+			ctx.font = "8pt monospace";
+			ctx.fillStyle = 'black';
+			ctx.textAlign = 'center';
+			ctx.fillText( obj.id, obj.x, obj.y - 8 );
+		} else if ( obj.type === 'missile' ) {
+			ctx.beginPath();
+			ctx.fillRect( obj.x, obj.y, 2, 2 );
+			ctx.closePath();
+			ctx.fill();
+			ctx.stroke();
+		}
 	};
 
 	exports.Renderer = CanvasRenderer;

@@ -44,7 +44,7 @@ game.load( { objects : {}, timeStamp : new Date() });
 /* Set up Socket.IO */
 
 io.configure('development',  function(){
-	    io.set('transports', ['xhr-polling']);
+	io.set('transports', ['xhr-polling', 'jsonp-polling']);
 });
 
 io.configure( function () {
@@ -101,8 +101,15 @@ io.sockets.on( 'connection', function ( client ) {
 		game.rotate( playerId, data.direction );
 		data.playerId = playerId;
 
-		data.timeStamp = ( new Date() ).valueOf;
+		data.timeStamp = ( new Date() ).valueOf();
 		io.sockets.emit( 'rotate', data );
+	});
+
+	client.on( 'shoot', function ( data ) {
+		game.shoot( playerId, data.direction );
+		data.playerId = playerId;
+		data.timeStamp = ( new Date() ).valueOf();
+		io.sockets.emit( 'shoot', data );
 	});
 
 	client.on( 'leave', function ( data ) {
@@ -120,6 +127,6 @@ io.sockets.on( 'connection', function ( client ) {
 			updateCount : game.updateCount,
 			observerCount : observerCount
 		});
-	}, 2000 );
+	}, 200 );
 
 });

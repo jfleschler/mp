@@ -42,7 +42,7 @@
 	</head>
 	<body>
 		<div id="outer">
-			<canvas id="canvas"></canvas>
+			<canvas id="canvas" width="1000" height="400"></canvas>
 
 			<div id="hud">
 				<div id="buttons">

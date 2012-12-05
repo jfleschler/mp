@@ -5,6 +5,7 @@
 		this.oldState = {};
 
 		this.lastId = 0;
+		this.lastMId = 1000;
 		this.callbacks = {};
 
 		this.updateCount = 0;
@@ -32,6 +33,13 @@
 			var obj = objects[objId];
 			if ( !obj.dead ) {
 				newObjects[obj.id] = obj.computeState( delta );
+
+				if ( obj.type === 'missile' ) {
+					if ( !this.inBounds_( obj ) ) {
+						console.log( 'dead', obj );
+						delete newState.objects[obj.id];
+					}
+				}
 			}
 		}
 		
@@ -43,10 +51,12 @@
 	Game.prototype.update = function ( timeStamp ) {
 		var delta = timeStamp - this.state.timeStamp;
 		if ( delta < 0 ) {
-			throw "Can't compute state in the past. Delta: " + delta;
+			console.log("Can't compute state in the past. Delta: " + delta);
+			return;
 		}
 		if ( delta > Game.MAX_DELTA ) {
-			throw "Can't compute state so far in the future. Delta: " + delta;
+			console.log("Can't compute state so far in the future. Delta: " + delta);
+			return;
 		}
 		this.state = this.computeState( delta );
 		this.updateCount++;
@@ -93,6 +103,23 @@
 		delete this.state.objects[playerId];
 	};
 
+	Game.prototype.shoot = function ( id, timeStamp ) {
+		var player = this.state.objects[id];
+
+		var ex = Math.cos( player.dir ) * 2;
+		var ey = Math.sin( player.dir ) * 2;
+		
+		this.lastMId++;
+		var m = new Missile( {
+			x : player.x,
+			y : player.y,
+			vx : ex,
+			vy : ey,
+			id : this.lastMId 
+		} );
+		this.state.objects[m.id] = m;
+	};
+
 	Game.prototype.move = function ( id, timeStamp ) {
 		var player = this.state.objects[id];
 
@@ -105,16 +132,11 @@
 
 		player.vx = ex * Game.PLAYER_SPEED_RATIO; 
 		player.vy = ey * Game.PLAYER_SPEED_RATIO; 
-
-		if ( player.vx < -1 ) player.vx = -1;
-		if ( player.vx >  1 ) player.vx =  1;
-		if ( player.vy < -1 ) player.vy = -1;
-		if ( player.vy >  1 ) player.vy =  1;
 	}; 
 	
 	Game.prototype.rotate = function ( id, direction, timeStamp ) {
 		var player = this.state.objects[id];
-		if ( !direction ) {
+		if ( !player || !direction ) {
 			return;
 		}
 		player.dir = direction;
@@ -163,6 +185,7 @@
 
 	// HELPER FUNTIONS
 	
+
 	Game.prototype.inBounds_ = function ( o ) {
 		return o.r < o.x && o.x < ( Game.WIDTH - o.r) && 
 			o.r < o.y && o.y < ( Game.HEIGHT - o.r);
@@ -227,7 +250,34 @@
 //	Player.prototype = new Player();
 //	Player.prototype.constructor = Player;
 
+	
+	var Missile = function ( params ) {
+		this.id = params.id;
+		this.x = params.x;
+		this.y = params.y;
+		this.vx = params.vx;
+		this.vy = params.vy;
+		this.r = 2;
+		this.type = 'missile';
+	};
+
+	Missile.prototype.toJSON = function () {
+		var obj = {};
+		for ( var prop in this ) {
+			obj[prop] = this[prop];
+		}
+		return obj;
+	};
+
+	Missile.prototype.computeState = function ( delta ) {
+		var newMissile = new Missile ( this.toJSON() );
+		newMissile.x += this.vx * delta / 10;
+		newMissile.y += this.vy * delta / 10;
+		return newMissile;
+	};
+
+
 	exports.Game = Game;
 	exports.Player = Player;
-
+	exports.Missile = Missile;
 })( typeof  global === "undefined" ? window : exports );
