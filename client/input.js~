@@ -4,13 +4,19 @@
 		this.game = game;
 		var ctx = this;
 
+		var keyMap = { 87: false, 65: false, 68: false };
+
 		var canvas = document.getElementById( 'canvas' );
 		canvas.addEventListener('click', function ( e ) {
 			ctx.onclick.call( ctx, e );
 		});
 
 		window.addEventListener( 'keydown', function ( e ) {
-			ctx.onmove.call( ctx, e );
+			keyMap = ctx.onmove.call( ctx, e, keyMap );
+		});
+
+		window.addEventListener( 'keyup', function ( e ) {
+			keyMap = ctx.canclemove.call( ctx, e, keyMap );
 		});
 
 		canvas.addEventListener('mousemove', function ( e ) {
@@ -21,6 +27,25 @@
 		join.addEventListener( 'click', function( e ) {
 			ctx.onjoin.call( ctx, e );
 		});
+		
+		setInterval( function () {
+			if ( keyMap[87] ) {
+				socket.emit( 'move', {} );
+			}
+			if ( keyMap[65] ) {
+				var p = this.game.state.objects[playerId];
+				socket.emit( 'rotate', { direction : p.dir - 0.2 } );
+			}
+			if ( keyMap[68] ) {
+				var p = this.game.state.objects[playerId];
+				socket.emit( 'rotate', { direction : p.dir + 0.2 } );
+			}
+			if ( keyMap[32] ) {
+				var p = this.game.state.objects[playerId];
+				socket.emit( 'shoot', { direction : p.dir } );
+				keyMap[32] = false;
+			}
+		}, 1);
 	};
 
 	DesktopInput.prototype.onjoin = function () {
@@ -38,22 +63,25 @@
 		socket.emit( 'leave', { name : playerId } );
 	};
 
-	DesktopInput.prototype.onmove = function ( event ) {
+	DesktopInput.prototype.canclemove = function ( event, map ) {
+		map[event.keyCode] = false;
+		return map;
+	};
+
+	DesktopInput.prototype.onmove = function ( event, map ) {
 		var player = this.game.state.objects[playerId];
 		if ( !player ) {
-
 			return;
 		}
-		if ( event.keyCode == 87 ) {
-			socket.emit( 'move', {} );
-		}
+		map[event.keyCode] = true;
+		return map;
 	};
 
 	DesktopInput.prototype.onrotate = function ( event ) {
 		var cx = event.clientX - event.target.getBoundingClientRect().left;
 		var cy = event.clientY - event.target.getBoundingClientRect().top;
 
-		if ( !this.game ) {
+		if ( !this.game.state.objects ) {
 			return;
 		}
 
@@ -67,7 +95,7 @@
 		var py = player.y;
 
 		var angle = Math.atan2( cy - py, cx - px );
-		socket.emit( 'rotate', { direction : angle }  );
+//		socket.emit( 'rotate', { direction : angle }  );
 	};
 
 	DesktopInput.prototype.onclick = function ( event ) {

@@ -38,6 +38,22 @@
 					if ( !this.inBounds_( obj ) ) {
 						delete newState.objects[obj.id];
 					}
+					for ( var id in objects ) {
+						var cObj = objects[id];
+						if ( cObj.type === 'player' ) {
+							if ( cObj.collides( obj ) && cObj.id != obj.firedBy ) {
+								delete newState.objects[obj.id];
+								cObj.HP -= 10;
+								newObjects[cObj.id] = cObj;
+								break;
+							}
+						}
+					}
+				} else if ( obj.type === 'player' ) {
+					if ( obj.HP <= 5 ) {
+						newObjects[obj.id].dead = true;
+						this.callback_( 'dead', { id : obj.id, type: obj.type } );
+					}
 				}
 			}
 		}
@@ -92,7 +108,8 @@
 			vx : vx,
 			vy : vy,
 			r : 20,
-			dir : 0
+			dir : 0,
+			HP : 100
 		});
 		this.state.objects[player.id] = player;
 		return player.id;
@@ -114,14 +131,17 @@
 			y : player.y,
 			vx : ex,
 			vy : ey,
-			id : this.lastMId 
+			id : this.lastMId,
+			firedBy : player.id	
 		} );
 		this.state.objects[m.id] = m;
 	};
 
 	Game.prototype.move = function ( id, timeStamp ) {
 		var player = this.state.objects[id];
-
+		if ( !player ) {
+			return;
+		}
 		var ex = Math.cos( player.dir );
 		var ey = Math.sin( player.dir );
 		var len = Math.sqrt( ex * ex + ey * ey );
@@ -225,6 +245,7 @@
 		this.vy = params.vy;
 		this.type = 'player';
 		this.dir = params.dir;
+		this.HP = params.HP;
 	};
 
 	Player.prototype.computeState = function ( delta ) {
@@ -236,12 +257,17 @@
 		return newPlayer;
 	};
 
+	Player.prototype.collides = function ( obj ) {
+		var ex = ( obj.x - this.x ) * ( obj.x - this.x );
+		var ey = ( obj.y - this.y ) * ( obj.y - this.y );
+		var dist = Math.sqrt( ex + ey );
+		return dist < 12;
+	};
+
 	Player.prototype.toJSON = function () {
 		var obj = {};
 		for ( var prop in this ) {
-		//	if ( this.hasOwnProperty( prop ) ) {
 				obj[prop] = this[prop];
-		//	}
 		}
 		return obj;
 	};
@@ -258,6 +284,7 @@
 		this.vy = params.vy;
 		this.r = 2;
 		this.type = 'missile';
+		this.firedBy = params.firedBy;
 	};
 
 	Missile.prototype.toJSON = function () {

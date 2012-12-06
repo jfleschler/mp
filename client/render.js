@@ -54,7 +54,7 @@
 			ctx.lineTo( -10,  6 );
 			ctx.lineTo(  -6,  0 );
 			ctx.closePath();
-	//		ctx.fill();
+//			ctx.fill();
 			ctx.stroke();
 			ctx.restore();
 
@@ -62,6 +62,15 @@
 			ctx.fillStyle = 'black';
 			ctx.textAlign = 'center';
 			ctx.fillText( obj.id, obj.x, obj.y - 8 );
+
+			ctx.save();
+			ctx.translate( obj.x, obj.y );
+			ctx.lineWidth = 2;
+			ctx.strokeStyle = "green";
+			ctx.beginPath();
+			ctx.arc( 0, 0, 15, 4 * Math.PI / 5 * ( 1 - (( obj.HP + 20 ) / 120 )) + Math.PI / 5, ( 4 * Math.PI / 5), false );
+			ctx.stroke();
+			ctx.restore();
 		} else if ( obj.type === 'missile' ) {
 			ctx.beginPath();
 			ctx.fillRect( obj.x, obj.y, 2, 2 );

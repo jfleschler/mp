@@ -80,4 +80,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		document.getElementById( 'average-lag' ).innerText = Math.abs( updateDelta );
 	});
 
+	game.on( 'dead', function ( data ) {
+		// someone died
+	});
 });

@@ -63,7 +63,7 @@ io.sockets.on( 'connection', function ( client ) {
 
 	client.emit( 'start', { state : game.save() } );
 
-	console.log( '\t :: Socket.IO :: player ' + client.userid + ' connected' );
+	console.log( '\t :: Socket.IO :: client ' + client.userid + ' connected' );
 
 	client.on( 'state', function ( data ) {
 		client.emit( 'state', { state : game.save() } );
@@ -73,7 +73,7 @@ io.sockets.on( 'connection', function ( client ) {
 		playerId = game.join( data.name );
 		data.timeStamp = new Date();
 
-		console.log( '\t :: Socket.IO :: player ' + client.userid + ' :: playerId ' + playerId );
+		console.log( '\t :: Socket.IO :: client ' + client.userid + ' :: Name ' + data.name );
 
 		client.broadcast.emit( 'join', data );
 		data.isme = true;
@@ -129,4 +129,12 @@ io.sockets.on( 'connection', function ( client ) {
 		});
 	}, 2000 );
 
+});
+
+game.on( 'dead', function ( data ) {
+	io.sockets.emit( 'leave', { 
+		name: data.id, 
+		type: data.type, 
+		timeStamp: new Date() 
+	});
 });

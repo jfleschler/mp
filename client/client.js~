@@ -57,6 +57,13 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		}
 		game.rotate( data.playerId, data.direction, data.timeStamp );
 	});
+
+	socket.on( 'shoot', function ( data ) {
+		if ( !game.playerExists( data.playerId ) ) {
+			return;
+		}
+		game.shoot( data.playerId, data.timeStamp );
+	});
 		
 	socket.on( 'time', function ( data ) {
 		var updateDelta = data.lastUpdate - game.state.timeStamp;
