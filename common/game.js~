@@ -139,7 +139,9 @@
 
 	Game.prototype.move = function ( id, timeStamp ) {
 		var player = this.state.objects[id];
-
+		if ( !player ) {
+			return;
+		}
 		var ex = Math.cos( player.dir );
 		var ey = Math.sin( player.dir );
 		var len = Math.sqrt( ex * ex + ey * ey );

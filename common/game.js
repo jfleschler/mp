@@ -122,6 +122,9 @@
 	Game.prototype.shoot = function ( id, timeStamp ) {
 		var player = this.state.objects[id];
 
+		if ( !player ) {
+			return;
+		}
 		var ex = Math.cos( player.dir ) * 2;
 		var ey = Math.sin( player.dir ) * 2;
 		
